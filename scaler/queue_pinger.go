@@ -200,6 +200,8 @@ func fetchCounts(
 					"interceptorAddress",
 					u.String(),
 				)
+				// Close the "private" channel so the goroutine below isn't left hanging.
+				close(ch)
 				return err
 			}
 			ch <- counts
@@ -210,7 +212,9 @@ func fetchCounts(
 		go func() {
 			defer wg.Done()
 			res := <-ch
-			countsCh <- res
+			if res != nil {
+				countsCh <- res
+			}
 		}()
 	}
 
