@@ -41,6 +41,7 @@ type impl struct {
 	httpsoInformer informershttpv1alpha1.HTTPScaledObjectInformer
 	targetMetric   int64
 	externalscaler.UnimplementedExternalScalerServer
+	context context.Context
 }
 
 func newImpl(
@@ -48,12 +49,14 @@ func newImpl(
 	pinger *queuePinger,
 	httpsoInformer informershttpv1alpha1.HTTPScaledObjectInformer,
 	defaultTargetMetric int64,
+	context context.Context,
 ) *impl {
 	return &impl{
 		lggr:           lggr,
 		pinger:         pinger,
 		httpsoInformer: httpsoInformer,
 		targetMetric:   defaultTargetMetric,
+		context:        context,
 	}
 }
 
@@ -100,6 +103,8 @@ func (e *impl) StreamIsActive(
 	defer ticker.Stop()
 	for {
 		select {
+		case <-e.context.Done():
+			return nil
 		case <-server.Context().Done():
 			return nil
 		case <-ticker.C:

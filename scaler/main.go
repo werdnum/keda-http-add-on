@@ -175,6 +175,7 @@ func startGrpcServer(
 			pinger,
 			httpsoInformer,
 			targetPendingRequests,
+			ctx,
 		),
 	)
 
